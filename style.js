@@ -1,30 +1,39 @@
-// Mobile menu toggle
-const mobileMenu = document.getElementById('mobile-menu');
-const navLinks = document.getElementById('nav-links');
+// Wait for DOM to fully load
+document.addEventListener("DOMContentLoaded", () => {
+  // Mobile menu toggle
+  const mobileMenu = document.getElementById('mobile-menu');
+  const navLinks = document.getElementById('nav-links');
+  if (mobileMenu && navLinks) {
+    mobileMenu.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+    });
+  }
 
-mobileMenu.addEventListener('click', () => {
-  navLinks.classList.toggle('active');
-});
+  // Slideshow
+  let slideIndex = 0;
+  const showSlides = () => {
+    const slides = document.querySelectorAll(".slide");
+    slides.forEach(slide => slide.style.display = "none");
 
-// Slideshow
-let slideIndex = 0;
-function showSlides() {
-  const slides = document.querySelectorAll(".slide");
-  slides.forEach(slide => (slide.style.display = "none"));
+    slideIndex++;
+    if (slideIndex > slides.length) slideIndex = 1;
 
-  slideIndex++;
-  if (slideIndex > slides.length) slideIndex = 1;
+    if (slides[slideIndex - 1]) {
+      slides[slideIndex - 1].style.display = "block";
+    }
 
-  slides[slideIndex - 1].style.display = "block";
-  setTimeout(showSlides, 3000);
-}
-document.addEventListener("DOMContentLoaded", showSlides);
+    setTimeout(showSlides, 3000); // Change image every 3 seconds
+  };
+  showSlides();
 
-// Cursor follow
-const cursor = document.querySelector('.cursor');
-document.addEventListener('mousemove', (e) => {
-  cursor.style.left = e.clientX + 'px';
-  cursor.style.top = e.clientY + 'px';
+  // Cursor follow
+  const cursor = document.querySelector('.cursor');
+  if (cursor) {
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+  }
 });
 
 // Pokémon Generator (Local Images)
@@ -53,7 +62,6 @@ const pokemonList = [
   "sprigatito.png", "quaxly.png", "fuecoco.png", "ironvaliant.png", "miraidon.png"
 ];
 
-// Local image generator
 function generatePokemon() {
   const randomIndex = Math.floor(Math.random() * pokemonList.length);
   const selectedPokemon = pokemonList[randomIndex];
@@ -61,6 +69,7 @@ function generatePokemon() {
 
   if (pokemonImg) {
     pokemonImg.src = `images/${selectedPokemon}`;
+    pokemonImg.alt = selectedPokemon.replace('.png', '');
   } else {
     console.error("Element with ID 'pokemon-img' not found.");
   }
@@ -68,15 +77,20 @@ function generatePokemon() {
 
 // Live API generator (optional)
 const getRandomPokemon = async () => {
-  const randomId = Math.floor(Math.random() * 898) + 1; // Gen 1-8 range
-  const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
-  const data = await response.json();
+  try {
+    const randomId = Math.floor(Math.random() * 898) + 1; // Gen 1-8
+    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
+    const data = await response.json();
 
-  const pokemonName = data.name;
-  const pokemonImage = data.sprites.other['official-artwork'].front_default;
+    const pokemonName = data.name;
+    const pokemonImage = data.sprites.other['official-artwork'].front_default;
 
-  document.getElementById("pokemon-display").innerHTML = `
-    <h2>${pokemonName.toUpperCase()}</h2>
-    <img id="pokemon-img" src="${pokemonImage}" alt="${pokemonName}" />
-  `;
+    document.getElementById("pokemon-display").innerHTML = `
+      <h2>${pokemonName.toUpperCase()}</h2>
+      <img id="pokemon-img" src="${pokemonImage}" alt="${pokemonName}" />
+    `;
+  } catch (error) {
+    console.error("Failed to fetch Pokémon data:", error);
+  }
 };
+
